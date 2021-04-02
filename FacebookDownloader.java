@@ -81,9 +81,7 @@ class FVideo implements Comparable<FVideo> {
 
     public FVideo(String id) {
         this.id = id;
-        page = new FPage(fetchPageId());
         this.link = createLink();
-        this.downlodLink = fetchDownloadLink();
     }
 
     public String getId() {
@@ -95,7 +93,15 @@ class FVideo implements Comparable<FVideo> {
     }
 
     public String getDownloadLink() {
-        return this.downlodLink;
+
+        return this.downlodLink != null ? this.downlodLink : fetchDownloadLink();
+
+    }
+
+    public FPage getPage() {
+        if (this.page == null)
+            this.page = new FPage(fetchPageId());
+        return this.page;
     }
 
     @Override
@@ -124,10 +130,12 @@ class FVideo implements Comparable<FVideo> {
                 if (line.contains("hd_src:\"")) {
 
                     input.close();
-                    return line.split("hd_src:\"")[1].split("\"")[0];
+                    this.downlodLink = line.split("hd_src:\"")[1].split("\"")[0];
+                    return this.downlodLink;
                 } else if (line.contains("sd_src:\"")) {
                     input.close();
-                    return line.split("sd_src:\"")[1].split("\"")[0];
+                    this.downlodLink = line.split("sd_src:\"")[1].split("\"")[0];
+                    return this.downlodLink;
                 }
             }
         } catch (Exception e) {
@@ -144,7 +152,6 @@ class FVideo implements Comparable<FVideo> {
             while (input.hasNextLine()) {
                 String line = input.nextLine();
                 if (line.contains("href=\"/")) {
-
                     return line.split("href=\"/")[1].split("/videos/")[0];
                 }
 
