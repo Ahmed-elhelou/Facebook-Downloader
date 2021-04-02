@@ -9,4 +9,4 @@
    2- Tasks -> Import -> From text file
    3- chosse the exported file with name "Succeeded Links.txt"
 
-* I will be glad for hearing any suggestions
+* I would be glad to hear any suggestions
