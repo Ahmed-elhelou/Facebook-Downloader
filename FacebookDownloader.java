@@ -17,6 +17,10 @@ public class FacebookDownloader {
 
         ArrayList<FVideo> videosList = new ArrayList<>();
         ArrayList<FPage> pagesList = new ArrayList<>();
+        ArrayList<FVideo> testList = new ArrayList<>();
+        // testList.add(new FVideo("5"));
+        // testList.add(new FVideo("2"));
+        // System.out.println(testList.contains(new FVideo("9")));
 
         double count = 0;
         int succeeded = 0;
@@ -32,16 +36,16 @@ public class FacebookDownloader {
                 FVideo currentVideo = new FVideo(currentVidId);
 
                 if (!videosList.contains(currentVideo)) {
+
                     videosList.add(currentVideo);
                     pagesList.add(currentVideo.page);
                     count++;
-                    System.out.printf("\rwe found %f urls", count);
+                    System.out.printf("\rwe found %1.0f urls", count);
                 }
             }
 
         }
         count = 0;
-        System.out.println("");
 
         Collections.sort(videosList);
         // ArrayList<String> finalLinks = new ArrayList<>();
@@ -59,7 +63,7 @@ public class FacebookDownloader {
                 }
                 count++;
                 System.out.printf("\rCompleted: %2.2f%% || succeeded videos: %2d || failed videos:%2d",
-                        (count / fullLinks.size() * 100.0), succeeded, failed);
+                        (count / videosList.size() * 100.0), succeeded, failed);
             }
 
             System.out.printf("\nCongratulations!!\nsucceeded videos: %d || failed videos:%d ", succeeded, failed);
@@ -67,71 +71,95 @@ public class FacebookDownloader {
         }
 
     }
+}
 
-    class FVideo implements Comparable {
-        String id;
-        String link;
-        String downlodLink;
-        FPage page;
+class FVideo implements Comparable<FVideo> {
+    String id;
+    String link;
+    String downlodLink;
+    FPage page;
 
-        public FVideo(String id) {
-            this.id = id;
-            this.link = createLink();
-            this.downlodLink = fetchDownloadLink();
-            page = new FPage(fetchPageId());
-        }
+    public FVideo(String id) {
+        this.id = id;
+        page = new FPage(fetchPageId());
+        this.link = createLink();
+        this.downlodLink = fetchDownloadLink();
+    }
 
-        public String getId() {
-            return this.id;
-        }
+    public String getId() {
+        return this.id;
+    }
 
-    public getLink(){
+    public String getLink() {
         return this.link;
     }
 
-        public String getDownloadLink() {
-            return this.downlodLink;
-        }
-
-        @override
-        public boolean equals(FVideo other) {
-            return this.getId() == other.getId();
-        }
-
-        private String createLink() {
-            return String.format("%s/videos/%s", this.page.getLink(), this.id);
-
-        }
-
-        private String fetchDownloadLink() {
-            URL url = new URL(this.link);
-            Scanner input = new Scanner(url.openStream());
-            while (input.hasNextLine()) {
-                String line = input.nextLine();
-                if (line.contains("hd_src:\""))
-                    return line.split("hd_src:\"")[1].split("\"")[0];
-                else if (line.contains("sd_src:\""))
-                    return line.split("sd_src:\"")[1].split("\"")[0];
-            }
-            return "";
-        }
-
-        private String fetchPageId() {
-            URL url = new URL(this.link);
-            Scanner input = new Scanner(url.openStream());
-            while (input.hasNextLine()) {
-                String line = input.nextLine();
-                if (line.contains("href=\"/"))
-                    return line.split("href=\"/")[1].split("/videos/")[0];
-
-            }
-            return "";
-        }
-
-        public int compareTo(FVideo o) {
-            return this.id.compareTo(o.getId());
-        }
+    public String getDownloadLink() {
+        return this.downlodLink;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        FVideo other = (FVideo) o;
+        return this.id.equals(other.getId());
+    }
+
+    @Override
+    public String toString() {
+        return this.id;
+    }
+
+    private String createLink() {
+
+        return String.format("https://www.facebook.com/%s", this.id);
+
+    }
+
+    private String fetchDownloadLink() {
+        try {
+            URL url = new URL(this.link);
+            Scanner input = new Scanner(url.openStream());
+            while (input.hasNextLine()) {
+                String line = input.nextLine();
+                if (line.contains("hd_src:\"")) {
+
+                    input.close();
+                    return line.split("hd_src:\"")[1].split("\"")[0];
+                } else if (line.contains("sd_src:\"")) {
+                    input.close();
+                    return line.split("sd_src:\"")[1].split("\"")[0];
+                }
+            }
+        } catch (Exception e) {
+            e.getStackTrace();
+        }
+
+        return "";
+    }
+
+    private String fetchPageId() {
+        try {
+            URL url = new URL(this.link);
+            Scanner input = new Scanner(url.openStream());
+            while (input.hasNextLine()) {
+                String line = input.nextLine();
+                if (line.contains("href=\"/")) {
+
+                    return line.split("href=\"/")[1].split("/videos/")[0];
+                }
+
+            }
+        } catch (Exception e) {
+            e.getStackTrace();
+        }
+
+        return "104890151047099";
+    }
+
+    public int compareTo(FVideo o) {
+        return this.id.compareTo(o.getId());
+    }
+}
 
 class FPage {
     String id;
